@@ -16,4 +16,4 @@ COPY crontab.tmp /kopanowatch/crontab.tmp
 
 RUN crontab /kopanowatch/crontab.tmp
 
-CMD [/usr/sbin/crond, -f, -d, 0]
+CMD ["/usr/sbin/crond", "-f", "-d", "0"]
