@@ -1,13 +1,16 @@
-FROM alpine:3.7
+FROM debian:stretch
 
 LABEL maintainer=az@zok.xyz \
       version="1.0"
 
-RUN apk add --update \
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     lynx \
     curl \
-    bash \
-    && rm -rf /var/cache/apk/*
+    cron \
+    ca-certificates \
+    && rm -rf /var/cache/apt /var/lib/apt/lists
 
 RUN mkdir -p /kopanowatch/ /kopanowatch/archive
 
@@ -17,4 +20,4 @@ COPY crontab.tmp /kopanowatch/crontab.tmp
 RUN crontab /kopanowatch/crontab.tmp && \
     chmod a+x /kopanowatch/check_and_fetch.sh
 
-CMD ["/usr/sbin/crond", "-f", "-d", "0"]
+CMD ["/usr/sbin/cron", "-f"]
