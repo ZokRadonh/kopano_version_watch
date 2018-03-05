@@ -14,6 +14,7 @@ RUN mkdir -p /kopanowatch/ /kopanowatch/archive
 COPY check_and_fetch.sh /kopanowatch/check_and_fetch.sh
 COPY crontab.tmp /kopanowatch/crontab.tmp
 
-RUN crontab /kopanowatch/crontab.tmp
+RUN crontab /kopanowatch/crontab.tmp && \
+    chmod a+x /kopanowatch/check_and_fetch.sh
 
 CMD ["/usr/sbin/crond", "-f", "-d", "0"]
