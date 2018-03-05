@@ -4,8 +4,8 @@ component=$1
 
 currentUrl=$( lynx -listonly -nonumbers -dump https://download.kopano.io/community/$component:/ | grep Debian_9.0-amd64.tar.gz )
 
-currentFileName=$( echo "$currentUrl" | grep -Po "$component-.+")
-currentVersion=$( echo "$currentUrl" | grep -Po "$component-[^-]+")
+currentFileName=$( echo "$currentUrl" | grep -o "$component-.+")
+currentVersion=$( echo "$currentUrl" | grep -o "$component-[^-]+")
 
 if [ ! -d /kopanowatch/archive/$currentVersion ]
 then
