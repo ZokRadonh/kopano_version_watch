@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+
+  kopanowatcher:
+    build: .
+    container_name: kopano_version_watch
+    volumes:
+      - /var/kopanoarchive:/kopanowatch/archive
