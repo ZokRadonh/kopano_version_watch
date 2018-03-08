@@ -1,2 +1,1 @@
-0 5 */2 * * /kopanowatch/check_and_fetch.sh core > /dev/stdout
-0 5 */2 * * /kopanowatch/check_and_fetch.sh webapp > /dev/stdout
+0 5 */2 * * /kopanowatch/check_and_fetch.sh core webapp > /dev/stdout

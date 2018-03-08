@@ -1,23 +1,28 @@
-FROM debian:stretch
+FROM docker:17.12
 
 LABEL maintainer=az@zok.xyz \
       version="1.0"
 
-ENV DEBIAN_FRONTEND noninteractive
+#RUN apt-get update && apt-get install -y --no-install-recommends \
+#    lynx \
+#    curl \
+#    cron \
+#    ca-certificates \
+#    && rm -rf /var/cache/apt /var/lib/apt/lists
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    lynx \
-    curl \
-    cron \
+RUN apk add --update --no-cache \
     ca-certificates \
-    && rm -rf /var/cache/apt /var/lib/apt/lists
+    curl \
+    bash \
+    git \
+    binutils \
+    tar
 
 RUN mkdir -p /kopanowatch/ /kopanowatch/archive
 
-COPY check_and_fetch.sh /kopanowatch/check_and_fetch.sh
-COPY crontab.tmp /kopanowatch/crontab.tmp
+COPY check_and_fetch.sh build.sh crontab.tmp /kopanowatch/
 
 RUN crontab /kopanowatch/crontab.tmp && \
-    chmod a+x /kopanowatch/check_and_fetch.sh
+    chmod a+x /kopanowatch/*.sh 
 
-CMD ["/usr/sbin/cron", "-f"]
+CMD ["/usr/sbin/crond", "-f", "-d", "0"]
