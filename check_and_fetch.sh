@@ -31,6 +31,8 @@ check_and_archive() {
     currentVersion=$( echo "$currentUrl" | sed -r -e "s#.*($component-[0-9.]*).*#\1#")
     currentVersionPretty=$( echo "$currentUrl" | sed -r -e "s#.*$component-([0-9.]*).*#\1#")
 
+    cd /kopanowatch/archive/
+
     if [ ! -d /kopanowatch/archive/$currentVersion ]
     then
         mkdir -p /kopanowatch/archive/$currentVersion
@@ -42,7 +44,7 @@ check_and_archive() {
         # prepare index file
         rm -f /kopanowatch/archive/Packages.gz
         # parse and add to index
-        apt-ftparchive -d=/kopanowatch/archive/cache packages /kopanowatch/archive/ > /kopanowatch/archive/Packages
+        apt-ftparchive -d=/kopanowatch/archive/cache packages . > /kopanowatch/archive/Packages
         # finalize index
         gzip -9 /kopanowatch/archive/Packages
 
