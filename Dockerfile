@@ -1,28 +1,32 @@
-FROM docker:17.12
+FROM debian:stretch-slim
 
 LABEL maintainer=az@zok.xyz \
       version="1.0"
 
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    lynx \
-#    curl \
-#    cron \
-#    ca-certificates \
-#    && rm -rf /var/cache/apt /var/lib/apt/lists
+RUN mkdir -p /kopanowatch/download/ /kopanowatch/archive && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        lynx \
+        git \
+        apt-utils \
+        tar \
+        cron \
+    && rm -rf /var/cache/apt /var/lib/apt/lists
 
-RUN apk add --update --no-cache \
-    ca-certificates \
-    curl \
-    bash \
-    git \
-    binutils \
-    tar
-
-RUN mkdir -p /kopanowatch/ /kopanowatch/archive
+RUN curl -s https://download.docker.com/linux/static/stable/x86_64/docker-17.12.1-ce.tgz > /kopanowatch/download/docker.tgz
 
 COPY check_and_fetch.sh build.sh crontab.tmp /kopanowatch/
 
-RUN crontab /kopanowatch/crontab.tmp && \
-    chmod a+x /kopanowatch/*.sh 
+RUN tar xzf /kopanowatch/download/docker.tgz -C /kopanowatch/download/ && \
+    cp /kopanowatch/download/docker/docker /usr/local/bin && \
+    rm /kopanowatch/download/docker.tgz \
+        /kopanowatch/download/docker/dockerd \
+        /kopanowatch/download/docker/docker-containerd \
+        /kopanowatch/download/docker/docker-containerd-ctr \
+        /kopanowatch/download/docker/docker-containerd-shim && \
+    crontab /kopanowatch/crontab.tmp && \
+    chmod a+x /kopanowatch/*.sh
 
-CMD ["/usr/sbin/crond", "-f", "-d", "0"]
+CMD ["/usr/sbin/cron", "-f", "-L", "4"]

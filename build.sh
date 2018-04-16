@@ -12,39 +12,40 @@ webappVersion=$2
 if [ $coreVersion != 0 ]
 then
     # build base
-    echo "Building kopano_base ${coreVersion}..."
+    echo "Building base ${coreVersion}..."
     docker build \
         -t zokradonh/kopano_base:latest \
         -t zokradonh/kopano_base:${coreVersion} \
         --network host \
-        https://github.com/ZokRadonh/kopano_base.git
+        --build-arg CORE_VERSION=${coreVersion} \
+        https://github.com/ZokRadonh/KopanoDocker.git#:base
 
-    components=(kopano_server kopano_spooler kopano_monitor kopano_ical kopano_gateway kopano_search kopano_dagent)
+    components=(server spooler monitor ical gateway search dagent)
 
     # build all other components
     for repo in ${components[@]}; do
         echo "Building $repo..."
         docker build \
-            -t zokradonh/${repo}:latest \
-            -t zokradonh/${repo}:${coreVersion} \
+            -t zokradonh/kopano_${repo}:latest \
+            -t zokradonh/kopano_${repo}:${coreVersion} \
             --network host \
             --build-arg BASE_VERSION=${coreVersion} \
-            https://github.com/ZokRadonh/$repo.git
+            https://github.com/ZokRadonh/KopanoDocker.git#:$repo
     done
 fi
 
 if [ $webappVersion != 0 ]
 then
-    components=(kopano_webapp)
+    components=(webapp)
 
     # build all other components
     for repo in ${components[@]}; do
         echo "Building $repo..."
         docker build \
-            -t zokradonh/${repo}:latest \
-            -t zokradonh/${repo}:${webappVersion} \
+            -t zokradonh/kopano_${repo}:latest \
+            -t zokradonh/kopano_${repo}:${webappVersion} \
             --network host \
-            --build-arg BASE_VERSION=${coreVersion} \
-            https://github.com/ZokRadonh/$repo.git
+            --build-arg WEBAPP_VERSION=${webappVersion} \
+            https://github.com/ZokRadonh/KopanoDocker.git#:$repo
     done
 fi

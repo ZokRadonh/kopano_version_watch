@@ -7,12 +7,12 @@ check_and_archive() {
 
     if [ $# -eq 0 ]
     then
-        echo "Please specify component to check: ./check_and_fetch.sh core"
+        echo "Please specify component to check: check_and_archive core|webapp"
         exit 1
     fi
 
-    architectures=$(curl -sL https://download.kopano.io/community/${component}: |  grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]' |  sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//')
-    # architectures=$(lynx -listonly -nonumbers -dump https://download.kopano.io/community/$component:/)
+    #architectures=$(curl -sL https://download.kopano.io/community/${component}: |  grep -o '<a href=['"'"'"][^"'"'"']*['"'"'"]' |  sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//')
+    architectures=$(lynx -listonly -nonumbers -dump https://download.kopano.io/community/$component:)
 
     currentUrl=$( echo "$architectures" | grep Debian_9.0-amd64.tar.gz )
 
@@ -35,28 +35,14 @@ check_and_archive() {
     then
         mkdir -p /kopanowatch/archive/$currentVersion
         # download new version
-        curl -sL https://download.kopano.io/$currentUrl > /kopanowatch/archive/$currentVersion/$currentFileName
+        curl -sL $currentUrl > /kopanowatch/archive/$currentVersion/$currentFileName
         # extract
         tar -x -z -f /kopanowatch/archive/$currentVersion/$currentFileName --strip-components 1 -C /kopanowatch/archive/$currentVersion/
         rm /kopanowatch/archive/$currentVersion/$currentFileName
         # prepare index file
-        if [ -f /kopanowatch/archive/Packages.gz ]
-        then
-            gzip -d /kopanowatch/archive/Packages.gz
-        fi
+        rm -f /kopanowatch/archive/Packages.gz
         # parse and add to index
-        for debFile in `ls -1 /kopanowatch/archive/$currentVersion/ | grep .deb`; do
-            ar -p /kopanowatch/archive/$currentVersion/$debFile control.tar.gz | tar xzfO - ./control >> /kopanowatch/archive/Packages
-            echo "Filename: ./$currentVersion/$debFile" >> /kopanowatch/archive/Packages
-            filesize=$( stat -c %s /kopanowatch/archive/$currentVersion/$debFile )
-            echo "Size: $filesize" >> /kopanowatch/archive/Packages
-            echo "MD5sum:" $( md5sum /kopanowatch/archive/$currentVersion/$debFile | awk '{ print $1 }' ) >> /kopanowatch/archive/Packages
-            echo "SHA1:" $( sha1sum /kopanowatch/archive/$currentVersion/$debFile | awk '{ print $1 }' ) >> /kopanowatch/archive/Packages
-            echo "SHA256:" $( sha256sum /kopanowatch/archive/$currentVersion/$debFile | awk '{ print $1 }' ) >> /kopanowatch/archive/Packages
-            echo "SHA512:" $( sha512sum /kopanowatch/archive/$currentVersion/$debFile | awk '{ print $1 }' ) >> /kopanowatch/archive/Packages
-            echo  >> /kopanowatch/archive/Packages
-            echo  >> /kopanowatch/archive/Packages
-        done
+        apt-ftparchive -d=/kopanowatch/archive/cache packages /kopanowatch/archive/ > /kopanowatch/archive/Packages
         # finalize index
         gzip -9 /kopanowatch/archive/Packages
 
